@@ -3,12 +3,9 @@
 <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>
+<!--<script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>-->
 <body>
-    <% for (var item in data){ %>
-    <%=  item %>
-    <%=  data[item] %>
-    <% }; %>
+
 <input id="user_id">
 <button id="submit">提交</button>
 <script>
@@ -26,4 +23,139 @@
 </script>
 </body>
 </html>
+<body>
+<% for (var key in data){ %>
+<key> <%= key %></key>
+<value> <%= data[key] %></value>
 
+<% } %>
+
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="height:900px"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+
+
+<script type="text/javascript">
+    // 路径配置
+
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+    // 使用
+    require(
+        [
+            'echarts',
+            'echarts/chart/bar', // 使用柱状图就加载bar模块，按需加载
+            'echarts/chart/force'
+        ],
+        function (ec) {
+            // 基于准备好的dom，初始化echarts图表
+            var myChart = ec.init(document.getElementById('main'));
+            var mynode=[];
+//            var mynode="[";
+            $('key').each(function (index,element) {
+//                    mynode +='{"name":"'+$(this).text()+'","value":'+$('value').eq(index).text()+'},';
+                mynode.push({
+                    name: $(this).text(),
+                    value :$('value').eq(index).text()
+                    }
+                )
+            });
+//            mynode+=']';
+            console.log(mynode);
+
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    borderRadius: 8,//边框圆角
+                    backgroundColor: 'rgba(51,204,204,0.7)',//背景颜色（此时为默认色）
+                    formatter: "<div style=' text-align:center;'><img style=' text-align:center;width:100px;height:100px;' src='551951796.jpg'>" +
+                    "<p style='color: midnightblue;font:blod'>相同喜欢的歌<br>" +
+                    "歌名：Pray<br>" +
+                    "歌手：川瀬智子，<br>" +
+                    "专辑：银魂BEST</p></div>" +
+                    ""
+//                            function(params) {
+//                        var res=params.name+'<br/>';  //电厂名称
+//                        var s=myChart.getOption()  ;
+//                         res="<img style='width:250px;height:150px;' src='492496544.jpg'>";
+//
+//                       console.log(res);                         return res;
+//                    },
+                },
+                title : {
+                    text: '网易云用户关系图',
+                    subtext: '千万级数据',
+                    x:'left',
+                    y:'bottom'
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        restore : {show: true},
+                        magicType: {show: true, type: ['force', 'chord']},
+                        saveAsImage : {show: true}
+                    }
+                },
+                series : [
+                    {
+                        type:'force',
+                        name : "人物关系",
+                        ribbonType: false,
+                        categories : [
+                        ],
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,
+                                    textStyle: {
+                                        color: '#333',
+                                        fontWeight:'bolder',
+                                        fontSize:'25'
+                                    }
+                                },
+                                nodeStyle : {
+                                    brushType : 'both',
+                                    borderColor : 'rgba(255,215,0,0.4)',
+                                    borderWidth : 4
+                                },
+                                linkStyle: {
+                                    type: 'curve'
+                                }
+                            },
+                            emphasis: {
+                                label: {
+                                    show: false
+                                    // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
+                                },
+                                nodeStyle : {
+//                        r: 30
+                                },
+                                linkStyle : {}
+                            }
+                        },
+                        useWorker: false,
+                        minRadius : 30,
+                        maxRadius : 70,
+                        gravity: 1.2,
+                        scaling: 1.8,
+                        roam: true,
+
+                        nodes:mynode,
+                        links : [
+                            {'source': 'BAMBOO-\u677f\u5e03',
+                                target: 'qwe',
+                                'weight': 100},
+                           ]
+                    }
+                ]
+            };
+            // 为echarts对象加载数据
+            myChart.setOption(option);
+        }
+    );
+</script>
+</body>

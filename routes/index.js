@@ -15,12 +15,12 @@ var cheerio = require('cheerio');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    let user_id = 100055648;
+    let user_id = 100511899;
     // getUserInfo(user_id);
     let re = interLikeSongs(user_id);
     // let re = getUserRelation(user_id);
     co(function* () {
-        var user_list = yield redisCo.srandmember('co_users', 100);
+        var user_list = yield redisCo.srandmember('co_users', 10);
         var weight_items = {};
         for (let i = 0; i < user_list.length; i++) {
             let comb_id = user_list[i];
@@ -28,10 +28,15 @@ router.get('/', function (req, res, next) {
             if (weight) {
                 weight_items[comb_id] = weight;
             }
-            else {}
+            else {
+                weight_items[comb_id] = weight;
 
+            }
         }
-        res.render('index', {data: weight_items});
+
+        // var name = yield redisCo.hget('user:'+user_id,'name');
+        console.log(weight_items);
+        res.render('index', {data: weight_items,test:1});
 
     });
 });
