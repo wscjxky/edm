@@ -17,16 +17,27 @@ var cheerio = require('cheerio');
 router.get('/', function (req, res, next) {
     let user_id = 100055648;
     // getUserInfo(user_id);
-    // interLikeSongs(user_id);
-    let re = getUserRelation(user_id);
+    let re = interLikeSongs(user_id);
+    // let re = getUserRelation(user_id);
+    co(function* () {
+        var user_list = yield redisCo.srandmember('co_users', 100);
+        var weight_items = {};
+        for (let i = 0; i < user_list.length; i++) {
+            let comb_id = user_list[i];
+            let weight = yield redisCo.sinterstore(user_id + ':combine:' + comb_id, 'user:' + user_id + ':like_songs', 'user:' + comb_id + ':like_songs');
+            if (weight) {
+                weight_items[comb_id] = weight;
+            }
+            else {}
 
-    console.log(re);
-    res.render('index', {title: re});
+        }
+        res.render('index', {data: weight_items});
 
+    });
 });
 router.post('/', function (req, res, next) {
     console.log(req.body.user_id);
-    co(function*() {
+    co(function* () {
         var data = yield redisCo.set('test', 33);
         data = yield redisCo.get('test'); // logs 33
         redisClient.quit();
@@ -72,22 +83,11 @@ function getUserInfo(user_id) {
 }
 
 function interLikeSongs(user_id) {
-    co(function*() {
-        var user_list = yield redisCo.srandmember('co_users', 100);
-        for (let i = 0; i < user_list.length; i++) {
-            let comb_id = user_list[i];
-            console.log(comb_id);
-            let re = yield redisCo.sinterstore(user_id + ':combine:' + comb_id, 'user:' + user_id + ':like_songs', 'user:' + comb_id + ':like_songs');
-            let weight
-            console.log(re);
-            redisClient.quit();
 
-        }
-    });
 }
 
 function getUserRelation(user_id) {
-    co(function*() {
+    co(function* () {
         var keys = yield redisCo.keys('*:combine:*');
         for (let i = 0; i < keys.length; i++) {
             let keyname = keys[i];
