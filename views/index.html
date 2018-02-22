@@ -55,36 +55,39 @@
             // 基于准备好的dom，初始化echarts图表
             var myChart = ec.init(document.getElementById('main'));
             var mynode=[];
+            var mylinks=[];
 //            var mynode="[";
+            mynode.push({
+                    name: '<%= user %>',
+                    value :100
+                }
+            );
             $('key').each(function (index,element) {
 //                    mynode +='{"name":"'+$(this).text()+'","value":'+$('value').eq(index).text()+'},';
                 mynode.push({
                     name: $(this).text(),
                     value :$('value').eq(index).text()
                     }
-                )
+                );
+                mylinks.push({
+                    source : '<%= user %>',
+                    target: $(this).text(),
+                    weight: $('value').eq(index).text()
+
+            })
             });
 //            mynode+=']';
             console.log(mynode);
+
+
+
 
             var option = {
                 tooltip: {
                     trigger: 'item',
                     borderRadius: 8,//边框圆角
                     backgroundColor: 'rgba(51,204,204,0.7)',//背景颜色（此时为默认色）
-                    formatter: "<div style=' text-align:center;'><img style=' text-align:center;width:100px;height:100px;' src='551951796.jpg'>" +
-                    "<p style='color: midnightblue;font:blod'>相同喜欢的歌<br>" +
-                    "歌名：Pray<br>" +
-                    "歌手：川瀬智子，<br>" +
-                    "专辑：银魂BEST</p></div>" +
-                    ""
-//                            function(params) {
-//                        var res=params.name+'<br/>';  //电厂名称
-//                        var s=myChart.getOption()  ;
-//                         res="<img style='width:250px;height:150px;' src='492496544.jpg'>";
-//
-//                       console.log(res);                         return res;
-//                    },
+                    formatter: "<a href='index.html'>"
                 },
                 title : {
                     text: '网易云用户关系图',
@@ -138,18 +141,14 @@
                             }
                         },
                         useWorker: false,
-                        minRadius : 30,
-                        maxRadius : 70,
-                        gravity: 1.2,
-                        scaling: 1.8,
+                        minRadius : 10,
+                        maxRadius : 60,
+                        gravity: 0.4,
+                        scaling: 5.0,
                         roam: true,
 
                         nodes:mynode,
-                        links : [
-                            {'source': 'BAMBOO-\u677f\u5e03',
-                                target: 'qwe',
-                                'weight': 100},
-                           ]
+                        links : mylinks
                     }
                 ]
             };
