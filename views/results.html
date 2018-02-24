@@ -10,15 +10,7 @@
     }
 </style>
 <body>
-<!--<h1>123</h1>-->
-<!--<data><%= data%></data>-->
-<!--<% for (var key in data){ %>-->
-<!--<id> <%= key %></id>-->
-<!--<a href="/results?id=<%= data[key]['userId'] %>">-->
-    <!--<img src="<%= data[key]['avatarUrl'] %>"> </img>-->
-    <!--<name> <%= data[key]['nickname'] %> </name>-->
-<!--</a>-->
-<!--<% } %>-->
+
 
 <input id="user_name">
 <button id="submit">提交</button>
@@ -40,7 +32,6 @@
                     for (let index in data){
                         console.log(data[index]);
                         console.log(data[index]['userId']);
-
                         str+='<a href="/results?id='+data[index]['userId']+'&name='+data[index]['nickname']+'"</a>'+
                                 '<img src="'+data[index]['avatarUrl']+'"</img>'+
                             '<p>'+data[index]['nickname']+'"</p>'
