@@ -17,39 +17,104 @@ var cheerio = require('cheerio');
 router.get('/', function (req, res, next) {
     let user_id = 100125845;
     // getUserInfo(user_id);
-    let re = interLikeSongs(user_id);
     // let re = getUserRelation(user_id);
+    // let user_name = req.query.name;
+    let user_name = '竹';
     co(function* () {
-        var user_list = yield redisCo.srandmember('co_users', 200);
+        let api_url = 'http://localhost:3333/search?keywords=' + encodeURI(user_name)+ '&type=1002&limit=5';
+
+        let err, sres = yield superagent.get(api_url)
+            .set('Content-Type', 'application/json');
+        if (err) {
+            res.render('results',{test:'error'});
+        }
+        let result =  JSON.parse(sres.text);
+        let user_id =  result['result']['userprofiles'][0]['userId'];
+        console.log(user_id);
+
+        res.render('results',{data:result['result']['userprofiles']});
+
+    });
+
+
+});
+
+async function getUserId(user_name) {
+    let api_url = 'http://localhost:3333/search?keywords=' + user_name + '&type=1002&limit=1';
+    superagent.get(api_url)
+        .set('Content-Type', 'application/json')
+        .end(function (err, sres) {
+            // 常规的错误处理
+            if (err) {
+                return next(err);
+            }
+            let result = JSON.parse(sres.text);
+            let user_id = result['result']['userprofiles'][0]['userId'];
+            console.log(user_id);
+            return user_id;
+        });
+}
+
+router.get('/results', function (req, res, next) {
+    let user_id = req.param('id');
+    let user_name = req.param('name');
+
+    console.log(user_name);
+    co(function* () {
+        var user_list = yield redisCo.srandmember('co_ori_users', 1);
         var weight_items = {};
         for (let i = 0; i < user_list.length; i++) {
             let comb_id = user_list[i];
+            let comb_name = yield redisCo.hget('user:' + comb_id, 'name');
             let weight = yield redisCo.sinterstore(user_id + ':combine:' + comb_id, 'user:' + user_id + ':like_songs', 'user:' + comb_id + ':like_songs');
             if (weight) {
-                weight_items[comb_id] = weight;
+                weight_items[comb_name] =
+                    {
+                        id: comb_id,
+                        value: weight
+                    }
+
             }
             else {
-
+                weight_items[comb_name] =
+                    {
+                        id: comb_id,
+                        value: weight
+                    }
             }
         }
-
         // var name = yield redisCo.hget('user:'+user_id,'name');
         console.log(weight_items);
-        res.render('index', {data: weight_items,test:1,user:user_id});
+        res.render('index', {data: weight_items, test: 1, user_id: user_id, user_name: user_name});
 
     });
+
+
 });
+
 router.post('/', function (req, res, next) {
-    console.log(req.body.user_id);
+    let user_name = req.body.user_name;
+    console.log(req.body.user_name);
     co(function* () {
-        var data = yield redisCo.set('test', 33);
-        data = yield redisCo.get('test'); // logs 33
-        redisClient.quit();
-        res.json({'data': data, 'status': true})
+        let api_url = 'http://localhost:3333/search?keywords=' + encodeURI(user_name)+ '&type=1002&limit=5';
+
+        let err, sres = yield superagent.get(api_url)
+            .set('Content-Type', 'application/json');
+        if (err) {
+            res.render('results',{test:'error'});
+        }
+        let result =  JSON.parse(sres.text);
+        let user_id =  result['result']['userprofiles'][0]['userId'];
+        console.log(user_id);
+        res.json({'data': result['result']['userprofiles'], 'status': true})
+
     });
+
+
 });
 
 module.exports = router;
+
 
 function getUserInfo(user_id) {
     superagent.get('http://music.163.com/api/user/playlist/?offset=&limit=1&uid=' + user_id)
@@ -87,6 +152,35 @@ function getUserInfo(user_id) {
 }
 
 function interLikeSongs(user_id) {
+    co(function* () {
+        let user_name = yield redisCo.hget('user:' + user_id, 'name');
+        var user_list = yield redisCo.srandmember('co_ori_users', 1);
+        var weight_items = {};
+        for (let i = 0; i < user_list.length; i++) {
+            let comb_id = user_list[i];
+            let comb_name = yield redisCo.hget('user:' + comb_id, 'name');
+            let weight = yield redisCo.sinterstore(user_id + ':combine:' + comb_id, 'user:' + user_id + ':like_songs', 'user:' + comb_id + ':like_songs');
+            if (weight) {
+                weight_items[comb_name] =
+                    {
+                        id: comb_id,
+                        value: weight
+                    }
+
+            }
+            else {
+                weight_items[comb_name] =
+                    {
+                        id: comb_id,
+                        value: weight
+                    }
+            }
+        }
+        // var name = yield redisCo.hget('user:'+user_id,'name');
+        console.log(weight_items);
+        res.render('index', {data: weight_items, test: 1, user_id: user_id, user_name: user_name});
+
+    });
 
 }
 

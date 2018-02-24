@@ -9,14 +9,14 @@
 <input id="user_id">
 <button id="submit">提交</button>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $("button").click(function () {
             $.post("/",
                 {
                     user_id: $('#user_id').val()
                 },
                 function (data) {
-                    alert("Data:"+data.data+data.status);
+                    alert("Data:" + data.data + data.status);
                 });
         });
     });
@@ -25,26 +25,22 @@
 </html>
 <body>
 <% for (var key in data){ %>
-<key> <%= key %></key>
-<value> <%= data[key] %></value>
+<name> <%= key %></name>
+<id> <%= data[key]['id'] %></id>
+<value> <%= data[key]['value'] %></value>
 
 <% } %>
 
-<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
 <div id="main" style="height:900px"></div>
-<!-- ECharts单文件引入 -->
 <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 
-
 <script type="text/javascript">
-    // 路径配置
 
     require.config({
         paths: {
             echarts: 'http://echarts.baidu.com/build/dist'
         }
     });
-    // 使用
     require(
         [
             'echarts',
@@ -54,32 +50,32 @@
         function (ec) {
             // 基于准备好的dom，初始化echarts图表
             var myChart = ec.init(document.getElementById('main'));
-            var mynode=[];
-            var mylinks=[];
+            var mynode = [];
+            var mylinks = [];
 //            var mynode="[";
             mynode.push({
-                    name: '<%= user %>',
-                    value :100
+                    name: '<%= user_name %>',
+                    id: '<%= user_id %>',
+                    value: 100
                 }
             );
-            $('key').each(function (index,element) {
+            $('name').each(function (index, element) {
 //                    mynode +='{"name":"'+$(this).text()+'","value":'+$('value').eq(index).text()+'},';
                 mynode.push({
-                    name: $(this).text(),
-                    value :$('value').eq(index).text()
+                        name: $(this).text(),
+                    id : $('id').eq(index).text(),
+                        value: $('value').eq(index).text()
                     }
                 );
                 mylinks.push({
-                    source : '<%= user %>',
+                    source: '<%= user_name %>',
                     target: $(this).text(),
                     weight: $('value').eq(index).text()
 
-            })
+                })
             });
 //            mynode+=']';
             console.log(mynode);
-
-
 
 
             var option = {
@@ -87,43 +83,47 @@
                     trigger: 'item',
                     borderRadius: 8,//边框圆角
                     backgroundColor: 'rgba(51,204,204,0.7)',//背景颜色（此时为默认色）
-                    formatter: "<a href='index.html'>"
+                    showDelay: 0,
+                    hideDelay: 50,
+                    transitionDuration: 0,
+                    borderWidth: 2,
+                    padding: 10,    // [5, 10, 15, 20]
+                    formatter: "相同喜爱歌曲数  <br/>{b} : {c}首"
                 },
-                title : {
+                title: {
                     text: '网易云用户关系图',
                     subtext: '千万级数据',
-                    x:'left',
-                    y:'bottom'
+                    x: 'left',
+                    y: 'bottom'
                 },
                 toolbox: {
-                    show : true,
-                    feature : {
-                        restore : {show: true},
+                    show: true,
+                    feature: {
+                        restore: {show: true},
                         magicType: {show: true, type: ['force', 'chord']},
-                        saveAsImage : {show: true}
+                        saveAsImage: {show: true}
                     }
                 },
-                series : [
+                series: [
                     {
-                        type:'force',
-                        name : "人物关系",
+                        type: 'force',
+                        name: "相同喜好音乐个数",
                         ribbonType: false,
-                        categories : [
-                        ],
+                        categories: [],
                         itemStyle: {
                             normal: {
                                 label: {
                                     show: true,
                                     textStyle: {
                                         color: '#333',
-                                        fontWeight:'bolder',
-                                        fontSize:'25'
+                                        fontWeight: 'bolder',
+                                        fontSize: '25'
                                     }
                                 },
-                                nodeStyle : {
-                                    brushType : 'both',
-                                    borderColor : 'rgba(255,215,0,0.4)',
-                                    borderWidth : 4
+                                nodeStyle: {
+                                    brushType: 'both',
+                                    borderColor: 'rgba(255,215,0,0.4)',
+                                    borderWidth: 4
                                 },
                                 linkStyle: {
                                     type: 'curve'
@@ -134,26 +134,34 @@
                                     show: false
                                     // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
                                 },
-                                nodeStyle : {
+                                nodeStyle: {
 //                        r: 30
                                 },
-                                linkStyle : {}
+                                linkStyle: {}
                             }
                         },
                         useWorker: false,
-                        minRadius : 10,
-                        maxRadius : 60,
+                        minRadius: 10,
+                        maxRadius: 60,
                         gravity: 0.4,
                         scaling: 5.0,
                         roam: true,
 
-                        nodes:mynode,
-                        links : mylinks
+                        nodes: mynode,
+                        links: mylinks,
+
                     }
+
                 ]
             };
-            // 为echarts对象加载数据
             myChart.setOption(option);
+            myChart.on('click', function (params) {
+                let id = params['data']['id'];
+                if (id) {
+                    window.open('http://music.163.com/user/home?id=' + id);
+
+                }
+            });
         }
     );
 </script>

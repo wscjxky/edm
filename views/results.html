@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<style>
+    img {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+<body>
+<!--<h1>123</h1>-->
+<!--<data><%= data%></data>-->
+<!--<% for (var key in data){ %>-->
+<!--<id> <%= key %></id>-->
+<!--<a href="/results?id=<%= data[key]['userId'] %>">-->
+    <!--<img src="<%= data[key]['avatarUrl'] %>"> </img>-->
+    <!--<name> <%= data[key]['nickname'] %> </name>-->
+<!--</a>-->
+<!--<% } %>-->
+
+<input id="user_name">
+<button id="submit">提交</button>
+<div id="content"></div>
+
+</body>
+<script>
+    $(document).ready(function () {
+        $("#submit").click(function () {
+            $.post("/",
+                {
+                    user_name: $('#user_name').val()
+                },
+                function (data) {
+
+                    console.log("Data:" + data.data + data.status);
+                    data = data.data;
+                    var str='';
+                    for (let index in data){
+                        console.log(data[index]);
+                        console.log(data[index]['userId']);
+
+                        str+='<a href="/results?id='+data[index]['userId']+'&name='+data[index]['nickname']+'"</a>'+
+                                '<img src="'+data[index]['avatarUrl']+'"</img>'+
+                            '<p>'+data[index]['nickname']+'"</p>'
+                    }
+                    $('#content').html(str);
+                });
+        });
+    });
+</script>
+
+</html>
