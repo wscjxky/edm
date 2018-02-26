@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<!--<script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>-->
+
+<body>
+<div style="display: none">
+<% for (var key in data){ %>
+<name> <%= key %></name>
+<id> <%= data[key]['id'] %></id>
+<value> <%= data[key]['value'] %></value>
+
+<% } %>
+</div>
+<div id="main" style="height:900px"></div>
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+
+<script type="text/javascript">
+
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+    require(
+        [
+            'echarts',
+            'echarts/chart/bar', // 使用柱状图就加载bar模块，按需加载
+            'echarts/chart/force'
+        ],
+        function (ec) {
+            // 基于准备好的dom，初始化echarts图表
+            var myChart = ec.init(document.getElementById('main'));
+            var mynode = [];
+            var mylinks = [];
+//            var mynode="[";
+            mynode.push({
+                    name: '<%= user_name %>',
+                    id: '<%= user_id %>',
+                    value: 30
+                }
+            );
+            $('name').each(function (index, element) {
+//                    mynode +='{"name":"'+$(this).text()+'","value":'+$('value').eq(index).text()+'},';
+                mynode.push({
+                        name: $(this).text(),
+                    id : $('id').eq(index).text(),
+                        value: $('value').eq(index).text()
+                    }
+                );
+                mylinks.push({
+                    source: '<%= user_name %>',
+                    target: $(this).text(),
+                    weight: $('value').eq(index).text()
+
+                })
+            });
+//            mynode+=']';
+            console.log(mynode);
+
+
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    borderRadius: 8,//边框圆角
+                    backgroundColor: 'rgba(51,204,204,0.7)',//背景颜色（此时为默认色）
+                    showDelay: 0,
+                    hideDelay: 50,
+                    transitionDuration: 0,
+                    borderWidth: 2,
+                    padding: 10,    // [5, 10, 15, 20]
+                    formatter: "相同喜爱歌曲数  <br/>{b} : {c}首"
+                },
+                title: {
+                    text: '网易云用户关系图',
+                    subtext: '千万级数据',
+                    x: 'left',
+                    y: 'bottom'
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        restore: {show: true},
+                        magicType: {show: true, type: ['force', 'chord']},
+                        saveAsImage: {show: true}
+                    }
+                },
+                series: [
+                    {
+                        type: 'force',
+                        name: "相同喜好音乐个数",
+                        ribbonType: false,
+                        categories: [],
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,
+                                    textStyle: {
+                                        color: '#333',
+                                        fontWeight: 'bolder',
+                                        fontSize: '25'
+                                    }
+                                },
+                                nodeStyle: {
+                                    brushType: 'both',
+                                    borderColor: 'rgba(255,215,0,0.4)',
+                                    borderWidth: 4
+                                },
+                                linkStyle: {
+                                    type: 'curve'
+                                }
+                            },
+                            emphasis: {
+                                label: {
+                                    show: false
+                                    // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
+                                },
+                                nodeStyle: {
+//                        r: 30
+                                },
+                                linkStyle: {}
+                            }
+                        },
+                        useWorker: false,
+                        minRadius: 10,
+                        maxRadius: 60,
+                        gravity: 0.4,
+                        scaling: 4.0,
+                        roam: true,
+
+                        nodes: mynode,
+                        links: mylinks,
+
+                    }
+
+                ]
+            };
+            myChart.setOption(option);
+            myChart.on('click', function (params) {
+                let id = params['data']['id'];
+                if (id) {
+                    window.open('http://music.163.com/user/home?id=' + id);
+
+                }
+            });
+        }
+    );
+</script>
+</body>
+</html>

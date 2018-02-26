@@ -13,13 +13,14 @@ var redisCo = wrapper(redisClient);
 var superagent = require('superagent');
 var cheerio = require('cheerio');
 
+const USER_LIMIT=100;
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    res.render('results');
+    res.render('index');
 });
 
 
-router.get('/results', function (req, res, next) {
+router.get('/result', function (req, res, next) {
     let user_id = req.param('id');
     let user_name = req.param('name');
     console.log(user_name);
@@ -29,7 +30,7 @@ router.get('/results', function (req, res, next) {
         if (init_likesongs != 0) {
             console.log('fuck you' + init_likesongs.toString());
 
-            var user_list = yield redisCo.srandmember('co_ori_users', 1);
+            var user_list = yield redisCo.srandmember('co_ori_users', USER_LIMIT);
             var weight_items = {};
             for (let i = 0; i < user_list.length; i++) {
                 let comb_id = user_list[i];
@@ -44,16 +45,12 @@ router.get('/results', function (req, res, next) {
 
                 }
                 else {
-                    weight_items[comb_name] =
-                        {
-                            id: comb_id,
-                            value: weight
-                        }
+
                 }
             }
             // var name = yield redisCo.hget('user:'+user_id,'name');
             console.log(weight_items);
-            res.render('index', {data: weight_items, test: 1, user_id: user_id, user_name: user_name});
+            res.render('result', {data: weight_items, test: 1, user_id: user_id, user_name: user_name});
         }
         else {
             console.log('fuck me' + init_likesongs.toString());
@@ -104,7 +101,7 @@ router.get('/results', function (req, res, next) {
             }
             // var name = yield redisCo.hget('user:'+user_id,'name');
             console.log(weight_items);
-            res.render('index', {data: weight_items, test: 1, user_id: user_id, user_name: user_name});
+            res.render('result', {data: weight_items, test: 1, user_id: user_id, user_name: user_name});
         }
 
 
