@@ -12,7 +12,7 @@ redisClient.select('10', function (error) {
 var redisCo = wrapper(redisClient);
 var superagent = require('superagent');
 var cheerio = require('cheerio');
-
+var api_host = 'http://47.94.251.202/nodejs';
 const USER_LIMIT=50;
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -115,7 +115,7 @@ router.post('/', function (req, res, next) {
     console.log(req.body.user_name);
 
     co(function* () {
-        let api_url = 'http://localhost:3333/search?keywords=' + encodeURI(user_name) + '&type=1002&limit=5';
+        let api_url = api_host+'/search?keywords=' + encodeURI(user_name) + '&type=1002&limit=5';
 
         let err, sres = yield superagent.get(api_url)
             .set('Content-Type', 'application/json');
@@ -135,7 +135,7 @@ router.post('/', function (req, res, next) {
 });
 
 async function getUserId(user_name) {
-    let api_url = 'http://localhost:3333/search?keywords=' + user_name + '&type=1002&limit=1';
+    let api_url = api_host+'/search?keywords=' + user_name + '&type=1002&limit=1';
     superagent.get(api_url)
         .set('Content-Type', 'application/json')
         .end(function (err, sres) {
