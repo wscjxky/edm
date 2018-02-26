@@ -13,7 +13,7 @@ var redisCo = wrapper(redisClient);
 var superagent = require('superagent');
 var cheerio = require('cheerio');
 
-const USER_LIMIT=100;
+const USER_LIMIT=50;
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index');
