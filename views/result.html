@@ -58,7 +58,6 @@
                 })
             });
 //            mynode+=']';
-            console.log(mynode);
 
 
             var option = {
@@ -75,7 +74,7 @@
                 },
                 title: {
                     text: '网易云用户关系图',
-                    subtext: '千万级数据',
+                    subtext :'点击节点进入用户主页',
                     x: 'left',
                     y: 'bottom'
                 },
@@ -140,6 +139,7 @@
             myChart.setOption(option);
             myChart.on('click', function (params) {
                 let id = params['data']['id'];
+                console.log(id);
                 if (id) {
                     window.open('http://music.163.com/user/home?id=' + id);
 

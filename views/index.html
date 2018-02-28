@@ -1,44 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<link rel="stylesheet" type="text/css" href="stylesheets/style.css"/>
 <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <style>
     img {
-        width: 100px;
-        height: 100px;
+        width:150px;
+        height:150px;
+        border-radius:200px;
+
     }
+    p{
+        font-family: 'myFont';
+        font-size: 20px;
+        color : black;
+    }
+    input{
+        margin-left: 15px;
+    }
+    @font-face {font-family:myFont; src: url("font/PicoBlackA.ttf")}
 </style>
-<body>
+<body style="background: #f69c9f">
+<div class="panel">
+    <div class="wrap">
+        <div class="row">
+            <div class="form-inline">
+                <input  id="user_name" type="text" class="form-control" placeholder="昵称"/>
+                <input id="user_limit"  type="text" class="form-control"placeholder="匹配用户数（默认100）"/>
 
+                <button   type="button" class="btn btn-success" id="submit">提交</button>
+            </div>
+        </div>
+    </div>
 
-<input id="user_name">
-<button id="submit">提交</button>
-<div id="content"></div>
-
+</div>
+<div style="margin-top: 50px ;margin-left: 16%" class="row" id="content"></div>
 </body>
 <script>
     $(document).ready(function () {
         $("#submit").click(function () {
-            $.post("/",
-                {
-                    user_name: $('#user_name').val()
-                },
-                function (data) {
-
-                    console.log("Data:" + data.data + data.status);
-                    data = data.data;
-                    var str='';
-                    for (let index in data){
-                        console.log(data[index]);
-                        console.log(data[index]['userId']);
-                        str+='<a href="/result?id='+data[index]['userId']+'&name='+data[index]['nickname']+'"</a>'+
-                                '<img src="'+data[index]['avatarUrl']+'"</img>'+
-                            '<p>'+data[index]['nickname']+'"</p>'
-                    }
-                    $('#content').html(str);
-                });
+            var user_limit = $('#user_limit').val();
+            console.log(parseInt(user_limit)<200);
+            if( $('#user_limit').val() ==''){
+                user_limit='100';
+            }
+             if (parseInt(user_limit)<200 && parseInt(user_limit)>1  ){
+                 $.post("/",
+                     {
+                         user_name: $('#user_name').val()
+                     },
+                     function (data) {
+                         data = data.data;
+                         var str='';
+                         for (let index in data){
+                             str+=' <div class="col-md-2" style="text-align: center"><a href="/result?id='+data[index]['userId']+'&name='+data[index]['nickname']+'&limit='+user_limit+'"</a>'+
+                                 '<img src="'+data[index]['avatarUrl']+'"</img>'+
+                                 '<p>'+data[index]['nickname']+'"</p></div>'
+                         }
+                         $('#content').html(str);
+                     });
+             }
+             else{
+                 alert('输入用户数错误，请重新输入');
+             }
         });
+
     });
 </script>
 

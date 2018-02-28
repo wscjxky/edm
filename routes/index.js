@@ -13,7 +13,7 @@ var redisCo = wrapper(redisClient);
 var superagent = require('superagent');
 var cheerio = require('cheerio');
 var api_host = 'http://47.94.251.202/nodejs';
-const USER_LIMIT=50;
+var USER_LIMIT=150;
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index');
@@ -23,7 +23,18 @@ router.get('/', function (req, res, next) {
 router.get('/result', function (req, res, next) {
     let user_id = req.param('id');
     let user_name = req.param('name');
-    console.log(user_name);
+    try {
+        let limit = req.param('limit');
+        if (1 < parseInt(limit) < 200) {
+            USER_LIMIT = limit
+        }
+        else {
+            USER_LIMIT = 1
+        }
+    }
+    catch(err) {
+        console.log(user_name);
+    }
     co(function* () {
         let init_likesongs = yield redisCo.scard('user:' + user_id + ':like_songs');
         console.log('fuck' + init_likesongs.toString());
@@ -77,8 +88,9 @@ router.get('/result', function (req, res, next) {
                 console.log(href)
             });
 
-            var user_list = yield redisCo.srandmember('co_ori_users', 1);
+            var user_list = yield redisCo.srandmember('co_ori_users', USER_LIMIT);
             var weight_items = {};
+
             for (let i = 0; i < user_list.length; i++) {
                 let comb_id = user_list[i];
                 let comb_name = yield redisCo.hget('user:' + comb_id, 'name');
@@ -92,11 +104,7 @@ router.get('/result', function (req, res, next) {
 
                 }
                 else {
-                    weight_items[comb_name] =
-                        {
-                            id: comb_id,
-                            value: weight
-                        }
+
                 }
             }
             // var name = yield redisCo.hget('user:'+user_id,'name');
