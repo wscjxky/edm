@@ -7,7 +7,11 @@
 <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <!--<script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>-->
-
+<style>
+    #main {
+        position: relative;
+    }
+</style>
 <body>
 <div style="display: none">
 <% for (var key in data){ %>
@@ -17,139 +21,195 @@
 
 <% } %>
 </div>
-<div id="main" style="height:900px"></div>
+<div id="main" ></div>
 <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script>
+    var width;
+    var height;
+    var myChart;
+    function browserRedirect() {
+        var sUserAgent = navigator.userAgent.toLowerCase();
+        var bIsIpad = sUserAgent.match(/ipad/i) == "ipad";
+        var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";
+        var bIsMidp = sUserAgent.match(/midp/i) == "midp";
+        var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
+        var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";
+        var bIsAndroid = sUserAgent.match(/android/i) == "android";
+        var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";
+        var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
+        if (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) {
+            height = document.body.clientHeight/4
+            width = document.body.clientWidth
+            $("#main").css("width",width-30);
+            $("#main").css("height",height);
+            setEcharts();
+            $(window).resize(function() {
+                width = document.body.clientWidth
+                height = document.body.clientHeight/4
+                $("#main").css("width",width-30);
+                $("#main").css("height",height);
+            });
 
-<script type="text/javascript">
-
-    require.config({
-        paths: {
-            echarts: 'http://echarts.baidu.com/build/dist'
+        } else {
+            //自适应设置
+            width = $(window).width();
+            height = $(window).height();
+            // alert(height)
+            $("#main").css("width",width-35);
+            $("#main").css("height",height);
+            setEcharts();
+            $(window).resize(function() {
+                width = $(window).width();
+                height = $(window).height();
+                $("#main").css("width",width-35);
+                $("#main").css("height",height);
+            });
         }
-    });
-    require(
-        [
-            'echarts',
-            'echarts/chart/bar', // 使用柱状图就加载bar模块，按需加载
-            'echarts/chart/force'
-        ],
-        function (ec) {
-            // 基于准备好的dom，初始化echarts图表
-            var myChart = ec.init(document.getElementById('main'));
-            var mynode = [];
-            var mylinks = [];
+    }
+
+    window.onload=function(){
+        browserRedirect()
+    }
+</script>
+<script type="text/javascript">
+    function             setEcharts(){
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+        require(
+            [
+                'echarts',
+                'echarts/chart/bar', // 使用柱状图就加载bar模块，按需加载
+                'echarts/chart/force'
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('main'));
+                window.onresize = myChart.resize;
+
+                var mynode = [];
+                var mylinks = [];
 //            var mynode="[";
-            mynode.push({
-                    name: '<%= user_name %>',
-                    id: '<%= user_id %>',
-                    value: 30
-                }
-            );
-            $('name').each(function (index, element) {
-//                    mynode +='{"name":"'+$(this).text()+'","value":'+$('value').eq(index).text()+'},';
                 mynode.push({
-                        name: $(this).text(),
-                    id : $('id').eq(index).text(),
-                        value: $('value').eq(index).text()
+                        name: '<%= user_name %>',
+                        id: '<%= user_id %>',
+                        value: 30
                     }
                 );
-                mylinks.push({
-                    source: '<%= user_name %>',
-                    target: $(this).text(),
-                    weight: $('value').eq(index).text()
+                $('name').each(function (index, element) {
+//                    mynode +='{"name":"'+$(this).text()+'","value":'+$('value').eq(index).text()+'},';
+                    mynode.push({
+                            name: $(this).text(),
+                            id : $('id').eq(index).text(),
+                            value: $('value').eq(index).text()
+                        }
+                    );
+                    mylinks.push({
+                        source: '<%= user_name %>',
+                        target: $(this).text(),
+                        weight: $('value').eq(index).text()
 
-                })
-            });
+                    })
+                });
 //            mynode+=']';
 
 
-            var option = {
-                tooltip: {
-                    trigger: 'item',
-                    borderRadius: 8,//边框圆角
-                    backgroundColor: 'rgba(51,204,204,0.7)',//背景颜色（此时为默认色）
-                    showDelay: 0,
-                    hideDelay: 50,
-                    transitionDuration: 0,
-                    borderWidth: 2,
-                    padding: 10,    // [5, 10, 15, 20]
-                    formatter: "相同喜爱歌曲数  <br/>{b} : {c}首"
-                },
-                title: {
-                    text: '网易云用户关系图',
-                    subtext :'点击节点进入用户主页',
-                    x: 'left',
-                    y: 'bottom'
-                },
-                toolbox: {
-                    show: true,
-                    feature: {
-                        restore: {show: true},
-                        magicType: {show: true, type: ['force', 'chord']},
-                        saveAsImage: {show: true}
-                    }
-                },
-                series: [
-                    {
-                        type: 'force',
-                        name: "相同喜好音乐个数",
-                        ribbonType: false,
-                        categories: [],
-                        itemStyle: {
-                            normal: {
-                                label: {
-                                    show: true,
-                                    textStyle: {
-                                        color: '#333',
-                                        fontWeight: 'bolder',
-                                        fontSize: '25'
+                var option = {
+                    tooltip: {
+                        trigger: 'item',
+                        borderRadius: 8,//边框圆角
+                        backgroundColor: 'rgba(51,204,204,0.7)',//背景颜色（此时为默认色）
+                        showDelay: 0,
+                        hideDelay: 50,
+                        transitionDuration: 0,
+                        borderWidth: 2,
+                        padding: 10,    // [5, 10, 15, 20]
+                        formatter: "相同喜爱歌曲数  <br/>{b} : {c}首"
+                    },
+                    title: {
+                        text: '网易云用户关系图',
+                        subtext :'点击节点进入用户主页',
+                        x: 'left',
+                        y: 'bottom'
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            restore: {show: true},
+                            magicType: {show: true, type: ['force', 'chord']},
+                            saveAsImage: {show: true}
+                        }
+                    },
+                    series: [
+                        {
+                            type: 'force',
+                            name: "相同喜好音乐个数",
+                            ribbonType: false,
+                            categories: [],
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true,
+                                        textStyle: {
+                                            color: '#333',
+                                            fontWeight: 'bolder',
+                                            fontSize: '25'
+                                        }
+                                    },
+                                    nodeStyle: {
+                                        brushType: 'both',
+                                        borderColor: 'rgba(255,215,0,0.4)',
+                                        borderWidth: 4
+                                    },
+                                    linkStyle: {
+                                        type: 'curve'
                                     }
                                 },
-                                nodeStyle: {
-                                    brushType: 'both',
-                                    borderColor: 'rgba(255,215,0,0.4)',
-                                    borderWidth: 4
-                                },
-                                linkStyle: {
-                                    type: 'curve'
+                                emphasis: {
+                                    label: {
+                                        show: false
+                                        // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
+                                    },
+                                    nodeStyle: {
+//                        r: 30
+                                    },
+                                    linkStyle: {}
                                 }
                             },
-                            emphasis: {
-                                label: {
-                                    show: false
-                                    // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
-                                },
-                                nodeStyle: {
-//                        r: 30
-                                },
-                                linkStyle: {}
-                            }
-                        },
-                        useWorker: false,
-                        minRadius: 10,
-                        maxRadius: 60,
-                        gravity: 0.4,
-                        scaling: 4.0,
-                        roam: true,
+                            useWorker: false,
+                            minRadius: 10,
+                            maxRadius: 60,
+                            gravity: 0.4,
+                            scaling: 4.0,
+                            roam: true,
 
-                        nodes: mynode,
-                        links: mylinks,
+                            nodes: mynode,
+                            links: mylinks,
+
+                        }
+
+                    ]
+                };
+                myChart.setOption(option);
+                window.onresize = myChart.resize;
+                myChart.on('click', function (params) {
+                    let id = params['data']['id'];
+                    console.log(id);
+                    if (id) {
+                        window.open('http://music.163.com/user/home?id=' + id);
 
                     }
-
-                ]
-            };
-            myChart.setOption(option);
-            myChart.on('click', function (params) {
-                let id = params['data']['id'];
-                console.log(id);
-                if (id) {
-                    window.open('http://music.163.com/user/home?id=' + id);
-
+                });
+                window.onresize = function(){
+                    myChart.resize();
                 }
-            });
-        }
-    );
+            }
+        );
+
+    }
+
 </script>
 </body>
 </html>
