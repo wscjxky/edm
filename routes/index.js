@@ -5,7 +5,7 @@ var redis = require('redis');
 var co = require('co');
 var wrapper = require('co-redis');
 var redisClient = redis.createClient('6379', '47.94.251.202');
-redisClient.auth("wscjxky");
+redisClient.auth("123");
 redisClient.select('10', function (error) {
     return !error;
 });
