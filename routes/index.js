@@ -47,6 +47,7 @@ router.get('/result', function (req, res, next) {
                 let comb_id = user_list[i];
                 let comb_name = yield redisCo.hget('user:' + comb_id, 'name');
                 let weight = yield redisCo.sinterstore(user_id + ':combine:' + comb_id, 'user:' + user_id + ':like_songs', 'user:' + comb_id + ':like_songs');
+                let expire = yield  redisCo.expire(user_id + ':combine:' + comb_id,100);
                 if (weight) {
                     weight_items[comb_name] =
                         {
